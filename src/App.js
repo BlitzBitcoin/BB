@@ -5,6 +5,8 @@ import React, { useState, useEffect } from "react";
 import AES from 'crypto-js/aes';
 import Utf8 from 'crypto-js/enc-utf8';
 
+import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import Tooltip from '@mui/material/Tooltip';
 
 function encryptWithAES(payload, password) {
   return AES.encrypt(payload, password).toString();
@@ -15,6 +17,8 @@ function decryptWithAES(payload, password) {
   const decryptedPayload = bytes.toString(Utf8);
   return decryptedPayload;
 };
+
+
 
 function App() {
 
@@ -65,15 +69,118 @@ function App() {
 
   localStorage.setItem('walletData', JSON.stringify(walletData));
 
+  const columns = [
+    {
+      field: "address",
+      headerName: "Address",
+      type: "string",
+      minWidth: 90,
+      flex: 1,
+    }, {
+      field: "balance",
+      headerName: "Balance",
+      type: "string",
+      minWidth: 90,
+      flex: 1,
+    },
+    {
+      field: "transactions",
+      headerName: "Transactions",
+      type: "string",
+      minWidth: 90,
+      flex: 1,
+    },
+    {
+      field: "received",
+      headerName: "Total Received",
+      type: "string",
+      minWidth: 90,
+      flex: 1,
+    },
+    {
+      field: "privateKey",
+      headerName: "Private Key",
+      type: "string",
+      minWidth: 90,
+      flex: 1,
+      renderCell: (params) => {
+        // console.warn('25', params)
+        const { privateKeyEncrypted } = params.row
+        if (privateKeyEncrypted) {
+
+
+
+          return <button onClick={() => getPrivateKey(privateKeyEncrypted)}>
+            Get Private Key
+          </button>
+        }
+      },
+    },
+  ]
+  const {
+    publicKey,
+    privateKeyEncrypted,
+    transactions: {
+      final_balance,
+      n_tx,
+      total_received
+    }
+  } =
+    firstWallet
+  const rows = [
+
+    {
+      id: 1,
+      address: publicKey,
+      balance: final_balance,
+      transactions: n_tx,
+      received: total_received,
+      privateKeyEncrypted
+    },
+    {
+      id: 666,
+      address: 'Total:',
+      balance: final_balance,
+      transactions: n_tx,
+      received: total_received
+    }
+  ]
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>{JSON.stringify(wallets)}</code> and save to reload.
-        </p>
-  
-      </header>
+      <header className="App-header">BB</header>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          // height: "90vh",
+        }}
+      >
+        <div style={{ height: "90vh", minWidth: '80vw' }}>
+          <DataGrid
+            rows={rows}
+            columns={columns}
+            pageSize={100}
+            // disableColumnFilter
+            // disableColumnSelector
+            // disableDensitySelector
+            // initialState={{
+            //   sorting: {
+            //     sortModel: [{ field: 'date', sort: 'desc' }],
+            //   },
+            // }}
+            components={{ Toolbar: GridToolbar }}
+            componentsProps={{
+              toolbar: {
+                showQuickFilter: true,
+                quickFilterProps: { debounceMs: 500 },
+              },
+            }}
+          />
+        </div>
+      </div>
+
+
     </div>
   );
 }
